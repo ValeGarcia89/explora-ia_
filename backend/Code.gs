@@ -1,5 +1,5 @@
 /** EXPLORA IA – backend en Google Apps Script (pegar en Extensiones → Apps Script de una Hoja de cálculo). */
-const CARPETA_ID = "PEGA_AQUI_EL_ID_DE_LA_CARPETA_DE_DRIVE";
+const CARPETA_ID = "1KYeOFc8bT4mTmfcSIQD9xUAU5vBVE7tQ";
 const MAX_BYTES = 30 * 1024 * 1024;
 const COLS = ["fecha","codigo","clase","equipo (nombre heroico)","participantes reales (solo visible para ti)","titulo","descripcion","aprendi","enlaces","publicada","archivos (json)","OCULTAR (escribe SI para quitarla de la galería)"];
 
