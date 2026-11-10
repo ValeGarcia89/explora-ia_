@@ -5,6 +5,7 @@ const st=E.st={n:1,files:[],sel:new Set(),people:[],subs:[],ok:true},MAXMB=100,M
 let DB;const db=()=>DB||(DB=new Promise((ok,no)=>{try{const r=indexedDB.open("explora_ia",1);r.onupgradeneeded=()=>{r.result.createObjectStore("people",{keyPath:"id"});r.result.createObjectStore("subs",{keyPath:"code"})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}}));
 const tx=(s,m,f)=>db().then(d=>new Promise((ok,no)=>{const t=d.transaction(s,m),q=f(t.objectStore(s));t.oncomplete=()=>ok(q&&q.result);t.onerror=()=>no(t.error)}));
 const all=s=>tx(s,"readonly",o=>o.getAll()),put=(s,v)=>tx(s,"readwrite",o=>o.put(v)),del=(s,k)=>tx(s,"readwrite",o=>o.delete(k));
+E.put=put;
 const load=E.load=async()=>{try{st.people=await all("people");st.subs=(await all("subs")).sort((a,b)=>a.fecha<b.fecha?1:-1);st.ok=true}catch(e){st.ok=false}};
 const sz=b=>b>1e6?(b/1e6).toFixed(1)+" MB":Math.max(1,Math.round(b/1e3))+" KB";
 const ico=f=>{const t=f.type||"",n=f.name.toLowerCase();return t.startsWith("image")?"🖼️":t.startsWith("video")?"🎬":t.startsWith("audio")?"🎵":/\.pdf$/.test(n)?"📕":/\.(zip|rar|7z)$/.test(n)?"🗜️":/\.sb[23]$/.test(n)?"🐱":/\.(docx?|txt|odt)$/.test(n)?"📝":/\.(pptx?|key)$/.test(n)?"📊":/\.(xlsx?|csv)$/.test(n)?"📈":"📄"};
@@ -24,7 +25,7 @@ E.renderEntregas=async root=>{root.innerHTML=`<section class="sk pgh"><div class
 <form id="sub" class="f"><div><b>¿Con quiénes trabajaste?</b><div id="chips" class="chips"></div></div><label>Título de tu proyecto<input name="titulo" required maxlength="70"></label><label>Descripción<textarea name="desc" rows="2" required maxlength="400"></textarea></label>
 <div id="dz" class="dz" tabindex="0" role="button" aria-label="Elegir archivos"><span class="big">📤</span><b>Suelta aquí tus archivos o haz clic</b><small id="dzn"></small><input id="fi" type="file" multiple hidden></div><div id="pv" class="fgrid"></div>
 <label>Enlaces (opcional, uno por línea)<textarea name="links" rows="2" placeholder="https://..."></textarea></label><label>¿Qué aprendí?<textarea name="aprendi" rows="2" maxlength="500"></textarea></label>
-<label class="chk"><input type="checkbox" name="aut"> Mi madre, padre o tutor autoriza que esta creación se muestre en la galería (opcional).</label><button class="btn">🚀 Guardar mi entrega</button><div id="out" aria-live="polite"></div></form></div></div>
+<button class="btn">🚀 Guardar mi entrega</button><div id="out" aria-live="polite"></div></form></div></div>
 <h3 style="margin:40px 0 14px">Mis entregas</h3><div class="grid" id="mine"></div></div></section>`;
 await load();if(!st.ok)$("#mine").insertAdjacentHTML("beforebegin",'<div class="note">Tu navegador no permite guardar archivos (¿modo privado?). Prueba en una ventana normal.</div>');
 tab();rPeople();rFiles();rMine();E.reveal(root)};
@@ -47,12 +48,12 @@ if(f.id==="sub"){e.preventDefault();const d=new FormData(f),out=$("#out");
 if(!st.sel.size)return out.innerHTML='<div class="note">Elige al menos un participante.</div>';
 const links=String(d.get("links")).split(/\s+/).filter(u=>/^https?:\/\//i.test(u));
 if(!st.files.length&&!links.length)return out.innerHTML='<div class="note">Sube al menos un archivo o pega un enlace.</div>';
-const code="EXP-C"+st.n+"-"+rnd(),s={code,n:st.n,team:st.people.filter(p=>st.sel.has(p.id)).map(p=>p.hero),titulo:d.get("titulo"),desc:d.get("desc"),aprendi:d.get("aprendi"),links,aut:!!d.get("aut"),fecha:new Date().toISOString(),files:st.files.map(x=>({name:x.name,type:x.type,size:x.size,blob:x}))};
+const code="EXP-C"+st.n+"-"+rnd(),s={code,n:st.n,team:st.people.filter(p=>st.sel.has(p.id)).map(p=>p.hero),titulo:d.get("titulo"),desc:d.get("desc"),aprendi:d.get("aprendi"),links,aut:true,fecha:new Date().toISOString(),files:st.files.map(x=>({name:x.name,type:x.type,size:x.size,blob:x}))};
 try{await put("subs",s)}catch(er){return out.innerHTML='<div class="note">No se pudo guardar (poco espacio o modo privado).</div>'}
 st.files=[];st.sel.clear();f.reset();await load();rPeople();rFiles();rMine();out.innerHTML=`<div class="ok">🎉 ¡Entrega guardada! Tu código de galería: <div class="code">${code}</div><small>Esta versión guarda en este navegador; la facilitadora la recibirá cuando se conecte el formulario oficial.</small></div>`}
 if(f.id==="bq"){e.preventDefault();await load();const q=$("#bc").value.trim().toUpperCase(),s=st.subs.find(x=>x.code===q);$("#bres").innerHTML=s?subCard(s,true):'<div class="note">No encontramos ese código en este dispositivo.</div>'}});
 E.renderGaleria=async root=>{await load();const mine=st.subs.filter(s=>s.aut);
-root.innerHTML=`<section class="sk pgh"><div class="w"><h2><span class="grad">Galería</span> de creaciones</h2><p class="lead">Solo se muestran creaciones autorizadas por un adulto responsable.</p></div></section><section><div class="w"><div class="note">Los ejemplos marcados <span class="ej">EJEMPLO</span> son de demostración, no son trabajos de participantes.</div>
+root.innerHTML=`<section class="sk pgh"><div class="w"><h2><span class="grad">Galería</span> de creaciones</h2><p class="lead">Las creaciones de los participantes aparecen aquí apenas se envían.</p></div></section><section><div class="w"><div class="note">Los ejemplos marcados <span class="ej">EJEMPLO</span> son de demostración, no son trabajos de participantes.</div>
 <form id="bq" class="srch"><label>Busca tu creación con su código<input id="bc" placeholder="EXP-C1-XXXX" autocomplete="off"></label><button class="btn d">Buscar</button></form><div id="bres"></div>
 <div class="grid" id="gal">${mine.map(s=>subCard(s,true)).join("")}${E.DEMO.map(x=>`<div class="card"><div class="thumb" style="background:${E.C[x.c-1].bg}">${x.e}</div><span class="ej">EJEMPLO</span> <span class="tag">Clase ${x.c}</span><h3>${esc(x.n)}</h3><p>${esc(x.d)}</p></div>`).join("")}</div></div></section>`;E.reveal(root)};
 })();

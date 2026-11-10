@@ -1,5 +1,7 @@
 /* Datos del sitio: edita aquí clases, recursos y carpetas de Drive. */
 (function(){const E=window.EX=window.EX||{};
+/* URL de la app web de Apps Script (ver backend/INSTALAR.md). Vacío = modo local. */
+E.API="https://script.google.com/macros/s/AKfycbyRfllfWZFTSxSEvQUFLe4E3zLoVvIfnhmsVBH9tTM9ILgiW-1AHeChno-tdzs2POxFzA/exec";
 E.D="https://drive.google.com/drive/folders/";E.Q="?usp=sharing";
 E.MAIN="1L0Y35DXJAjRI9rKyvFCCGe1-a1Djw7HQ";E.EXTRA="1a9DdZNDc-syjXQ6br7fqmC04bAa_JCB2";
 E.R=[
