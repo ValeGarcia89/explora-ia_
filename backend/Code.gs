@@ -9,12 +9,26 @@ function hoja_() {
   if (!sh) { sh = ss.insertSheet("Entregas"); sh.appendRow(COLS); sh.setFrozenRows(1); }
   return sh;
 }
+function idCarpeta_() {
+  const m = String(CARPETA_ID).match(/[-\w]{25,}/);
+  return m ? m[0] : String(CARPETA_ID).trim();
+}
 function carpeta_(code) {
-  const raiz = DriveApp.getFolderById(CARPETA_ID), it = raiz.getFoldersByName(code);
+  const raiz = DriveApp.getFolderById(idCarpeta_()), it = raiz.getFoldersByName(code);
   return it.hasNext() ? it.next() : raiz.createFolder(code);
 }
 function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
 function t_(s) { s = String(s || "").slice(0, 600); return /^[=+\-@]/.test(s) ? "'" + s : s; }
+
+/** Ejecútala una vez desde el editor para autorizar permisos y comprobar la carpeta. */
+function probar() {
+  const c = DriveApp.getFolderById(idCarpeta_());
+  const t = c.createFile("prueba.txt", "ok");
+  Logger.log("Carpeta: " + c.getName() + " | archivo de prueba creado: " + t.getId());
+  t.setTrashed(true);
+  hoja_();
+  Logger.log("Todo listo");
+}
 
 function doPost(e) {
   try {
