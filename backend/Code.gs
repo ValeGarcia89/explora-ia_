@@ -55,7 +55,7 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  if (!e || !e.parameter || e.parameter.action !== "gallery") return json_({ ok: true, msg: "EXPLORA IA activo" });
+  if (!e || !e.parameter || e.parameter.action !== "gallery") return json_({ ok: true, msg: "EXPLORA IA activo v2" });
   const v = hoja_().getDataRange().getValues(), items = [];
   for (let i = 1; i < v.length; i++) {
     const r = v[i];
